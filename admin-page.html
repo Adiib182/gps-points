@@ -60,6 +60,15 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec";
     const PASSWORD_AKSES = "123"; 
 
+    function panggilJSONP(url, namaCallback) {
+      const scriptLama = document.getElementById('jsonp-script');
+      if (scriptLama) scriptLama.remove();
+      const script = document.createElement('script');
+      script.id = 'jsonp-script';
+      script.src = `${url}&prefix=${namaCallback}&t=${new Date().getTime()}`;
+      document.body.appendChild(script);
+    }
+
     function verifikasiLogin() {
       const input = document.getElementById('pass-awal').value;
       const errorDiv = document.getElementById('error-login');
@@ -78,7 +87,7 @@
       input.value = value ? new Intl.NumberFormat('id-ID').format(value) : "";
     }
 
-    async function addPoin() {
+    function addPoin() {
       const p = document.getElementById('pass').value;
       const i = document.getElementById('idS').value;
       const rawNom = document.getElementById('nom').value;
@@ -90,24 +99,22 @@
       btn.innerText = "Memproses...";
       btn.disabled = true;
 
-      try {
-        const response = await fetch(`${API_URL}?action=tambahPoinOtomatis&pass=${p}&id=${i}&totalBelanja=${n}`, { method: "GET", redirect: "follow" });
-        const res = await response.json();
-
-        if (res.status === "success") {
-          alert(res.message);
-          document.getElementById('nom').value = "";
-          document.getElementById('idS').value = "";
-        } else {
-          alert(res.message || "Gagal menambah poin.");
-        }
-      } catch (error) {
-        alert("Terjadi error koneksi ke server backend.");
-      } finally {
-        btn.innerText = "TAMBAH POIN";
-        btn.disabled = false;
-      }
+      panggilJSONP(`${API_URL}?action=tambahPoinOtomatis&pass=${p}&id=${i}&totalBelanja=${n}`, "callbackAddPoin");
     }
+
+    window.callbackAddPoin = function(res) {
+      const btn = document.getElementById('btnSubmit');
+      btn.innerText = "TAMBAH POIN";
+      btn.disabled = false;
+
+      if (res.status === "success") {
+        alert(res.message);
+        document.getElementById('nom').value = "";
+        document.getElementById('idS').value = "";
+      } else {
+        alert(res.message || "Gagal menambah poin.");
+      }
+    };
   </script>
 </body>
 </html>
