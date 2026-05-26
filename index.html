@@ -1,15 +1,179 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green Rewards - GPS</title>
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f8f9fa; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Pramuka Square - Cek & Tukar Poin</title>
+  <style>
+    :root { --primary: #2e7d32; --accent: #ffb300; --bg: #f1f8e9; }
+    body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 450px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    h4 { color: var(--primary); text-align: center; font-weight: 800; margin-bottom: 20px; }
+    .input-group { display: flex; gap: 10px; }
+    input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; }
+    .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
+    .btn-gps { background: var(--primary); color: white; }
+    .hero { background: linear-gradient(135deg, var(--primary), #4caf50); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+    .poin-text { font-size: 2.5rem; font-weight: bold; margin: 5px 0; }
+    .hadiah-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+    .btn-tukar { background: var(--accent); color: #333; }
+    .btn-disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
+    .hidden { display: none; }
+    .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
+    .modal-content { background: white; margin: 20% auto; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; animation: slideDown 0.3s ease-out; }
+    .modal-input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #eee; border-radius: 10px; text-align: center; font-size: 1.5rem; letter-spacing: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
+    .modal-input:focus { border-color: var(--primary); }
+    .btn-confirm { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+    .btn-cancel { margin-top: 15px; color: #888; font-size: 0.85rem; cursor: pointer; display: inline-block; text-decoration: underline; }
+    @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
 </head>
 <body>
-    <iframe src="https://script.google.com/macros/s/AKfycbzf09f9UFkvSR6TT92fxXUtYFGLEAoeZ-OVXa-Tbo-OM63COjFY1rGEl0roNKVJMj-l/exec"></iframe>
+
+  <div class="container">
+    <div class="card">
+      <h4>GREEN PRAMUKA SQUARE</h4>
+      
+      <div class="input-group" id="loginSection">
+        <input type="text" id="idCek" placeholder="Masukkan No HP...">
+        <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek</button>
+      </div>
+
+      <div id="dashboard" class="hidden">
+        <div class="hero">
+          <h6 id="namaCust" style="margin:0;">-</h6>
+          <div class="poin-text" id="poinCust">0</div>
+          <p style="margin:0; opacity: 0.9;">Green Points</p>
+        </div>
+        <h5 style="margin-bottom:10px;">Katalog Hadiah</h5>
+        <div id="listHadiah"></div>
+      </div>
+      
+      <div style="text-align:center; margin-top:20px;">
+        <p id="linkDaftar"><a href="registrasi.html" style="color:var(--primary);">Belum punya akun? Daftar</a></p>
+        <button id="btnCekLain" class="btn btn-gps hidden" style="background:#6c757d" onclick="resetDashboard()">« Cek Nomor Lain</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pinModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin:0; color:var(--primary);">Konfirmasi PIN</h3>
+      <p style="font-size:0.85rem; color:#666;">Silakan masukkan PIN transaksi Anda</p>
+      <input type="password" id="pinInputan" class="modal-input" maxlength="6" inputmode="numeric" placeholder="••••••">
+      <button id="btnKonfirmasi" class="btn-confirm" onclick="eksekusiTukar()">TUKAR SEKARANG</button>
+      <div class="btn-cancel" onclick="tutupModal()">Batalkan</div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec;
+
+    let memberIdTemp = "";
+    let hadiahTemp = "";
+    
+    function resetDashboard() {
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('linkDaftar').classList.remove('hidden');
+      document.getElementById('btnCekLain').classList.add('hidden');
+      document.getElementById('idCek').value = "";
+    }
+    
+    async function loadDashboard() {
+      const id = document.getElementById('idCek').value;
+      if(!id) return alert("Silakan masukkan nomor HP.");
+      
+      const btnCek = document.getElementById('btnCek');
+      btnCek.innerText = "Memuat...";
+      btnCek.disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}?action=cekPoin&id=${id}`);
+        const res = await response.json();
+
+        if(res.status === "success") {
+          document.getElementById('loginSection').classList.add('hidden');
+          document.getElementById('dashboard').classList.remove('hidden');
+          document.getElementById('linkDaftar').classList.add('hidden');
+          document.getElementById('btnCekLain').classList.remove('hidden');
+          document.getElementById('namaCust').innerText = res.data.nama;
+          document.getElementById('poinCust').innerText = res.data.poin;
+          await loadKatalog(id, res.data.poin);
+        } else { 
+          alert(res.message || "Member tidak ditemukan."); 
+        }
+      } catch (error) {
+        alert("Gagal terhubung ke server backend.");
+      } finally {
+        btnCek.innerText = "Cek";
+        btnCek.disabled = false;
+      }
+    }
+
+    async function loadKatalog(id, poinUser) {
+      try {
+        const response = await fetch(`${API_URL}?action=getKatalog`);
+        const res = await response.json();
+
+        if (res.status === "success") {
+          const container = document.getElementById('listHadiah');
+          container.innerHTML = "";
+          
+          res.data.forEach(item => {
+            const bisa = poinUser >= item.poin;
+            container.innerHTML += `<div class="hadiah-item">
+              <div><strong>${item.nama}</strong><br><small style="color:#666">${item.poin} Poin</small></div>
+              <button class="btn ${bisa ? 'btn-tukar' : 'btn-disabled'}" ${bisa ? `onclick="tukar('${id}', '${item.nama}')"` : 'disabled'}>
+                ${bisa ? 'Tukar' : 'Poin Kurang'}
+              </button>
+            </div>`;
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function tukar(id, h) { 
+      memberIdTemp = id;
+      hadiahTemp = h;
+      document.getElementById('pinModal').style.display = 'block';
+      document.getElementById('pinInputan').value = "";
+      document.getElementById('pinInputan').focus();
+    }
+
+    function tutupModal() {
+      document.getElementById('pinModal').style.display = 'none';
+    }
+
+    async function eksekusiTukar() {
+      const pin = document.getElementById('pinInputan').value;
+      if(!pin) return alert("PIN wajib diisi!");
+
+      const btn = document.getElementById('btnKonfirmasi');
+      btn.innerText = "Memproses...";
+      btn.disabled = true;
+
+      try {
+        const encodeHadiah = encodeURIComponent(hadiahTemp);
+        const response = await fetch(`${API_URL}?action=tukarPoin&id=${memberIdTemp}&namaHadiah=${encodeHadiah}&pinInput=${pin}`);
+        const res = await response.json();
+
+        alert(res.message);
+        
+        if (res.status === "success") {
+          tutupModal();
+          await loadDashboard(); 
+        }
+      } catch (error) {
+        alert("Gagal melakukan penukaran poin.");
+      } finally {
+        btn.innerText = "TUKAR SEKARANG";
+        btn.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html>
