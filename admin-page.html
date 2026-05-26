@@ -91,7 +91,7 @@
       btn.disabled = true;
 
       try {
-        const response = await fetch(`${API_URL}?action=tambahPoinOtomatis&pass=${p}&id=${i}&totalBelanja=${n}`);
+        const response = await fetch(`${API_URL}?action=tambahPoinOtomatis&pass=${p}&id=${i}&totalBelanja=${n}`, { method: "GET", redirect: "follow" });
         const res = await response.json();
 
         if (res.status === "success") {
