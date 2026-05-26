@@ -3,26 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Green Pramuka Square - Cek & Tukar Poin</title>
+  <title>Green Pramuka Square - Member Rewards</title>
   <style>
     :root { --primary: #2e7d32; --accent: #ffb300; --bg: #f1f8e9; }
     body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; color: #333; }
     .container { max-width: 450px; margin: auto; }
     .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-    h4 { color: var(--primary); text-align: center; font-weight: 800; margin-bottom: 20px; }
+    
+    /* Branding & Logo */
+    .brand-header { text-align: center; margin-bottom: 20px; }
+    .brand-logo { max-width: 120px; height: auto; margin-bottom: 10px; border-radius: 8px; }
+    .brand-header h4 { color: var(--primary); font-weight: 800; margin: 0; letter-spacing: 0.5px; }
+    
+    /* Auto Promo Banner Section */
+    .promo-section { margin: 15px 0 25px 0; position: relative; }
+    .promo-title { font-size: 0.9rem; font-weight: bold; color: #555; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    
+    /* Pembungkus slider luar */
+    .slider-wrapper { width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    
+    /* Jalur geser dalam */
+    .promo-container { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
+    
+    /* Tiap banner promo mengisi 100% lebar slider dengan tinggi terkunci */
+    .promo-card { 
+      flex: 0 0 100%; 
+      background: #fff8e1; 
+      border-left: 5px solid var(--accent); 
+      box-sizing: border-box; 
+      height: 140px; /* Mengunci tinggi banner agar seragam semua */
+      overflow: hidden;
+      padding: 0; /* Di-nolkan agar gambar penuh sampai ujung */
+    }
+    
+    /* Desain teks promo bawaan agar tetap rapi */
+    .promo-card .text-promo-content { padding: 15px; }
+    .promo-card h5 { margin: 0 0 5px 0; color: #e65100; font-size: 0.9rem; }
+    .promo-card p { margin: 0; font-size: 0.78rem; color: #666; line-height: 1.4; }
+    
+    /* Proteksi Gambar agar tidak gepeng/tarik paksa */
+    .promo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Efek wallpaper: auto-crop proporsional */
+      object-position: center; /* Fokus di tengah gambar */
+      display: block;
+    }
+    
+    /* Titik Indikator di Bawah Banner */
+    .slider-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+    .dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; transition: 0.3s; }
+    .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
+
+    /* Input & Buttons */
     .input-group { display: flex; gap: 10px; }
     input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; }
     .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
     .btn-gps { background: var(--primary); color: white; }
-    .hero { background: linear-gradient(135deg, var(--primary), #4caf50); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
-    .poin-text { font-size: 2.5rem; font-weight: bold; margin: 5px 0; }
+    
+    /* Member Dashboard */
+    .hero { background: linear-gradient(135deg, var(--primary), #4caf50); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; }
+    .hero::after { content: ""; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+    .poin-text { font-size: 2.5rem; font-weight: bold; margin: 5px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+    
+    /* Catalog */
     .hadiah-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
     .btn-tukar { background: var(--accent); color: #333; }
     .btn-disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
     .hidden { display: none; }
+    
+    /* Modal PIN */
     .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
     .modal-content { background: white; margin: 20% auto; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; animation: slideDown 0.3s ease-out; }
-    .modal-input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #eee; border-radius: 10px; text-align: center; font-size: 1.5rem; letter-spacing: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
+    .modal-input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #eee; border-radius: 10px; text-align: center; font-size: 1.5rem; letter-spacing: 8px; box-sizing: border-box; outline: none; }
     .modal-input:focus { border-color: var(--primary); }
     .btn-confirm { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     .btn-cancel { margin-top: 15px; color: #888; font-size: 0.85rem; cursor: pointer; display: inline-block; text-decoration: underline; }
@@ -33,35 +86,73 @@
 
   <div class="container">
     <div class="card">
-      <h4>GREEN PRAMUKA SQUARE</h4>
       
+      <!-- ==================== BAGIAN LOGO ANDA ==================== -->
+      <div class="brand-header">
+        <img class="brand-logo" src="https://upload.wikimedia.org/wikipedia/id/2/28/Green_Pramuka_Square_logo.jpg" alt="Logo GPS">
+        <h4>GREEN PRAMUKA SQUARE</h4>
+      </div>
+      
+      <!-- Bagian Input Cek Poin Nomor HP -->
       <div class="input-group" id="loginSection">
         <input type="text" id="idCek" placeholder="Masukkan No HP...">
         <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek</button>
       </div>
 
+      <!-- Tampilan Dasbor Member Setelah Berhasil Cek -->
       <div id="dashboard" class="hidden">
         <div class="hero">
-          <h6 id="namaCust" style="margin:0;">-</h6>
+          <h6 id="namaCust" style="margin:0; font-size: 1rem; letter-spacing: 0.5px;">-</h6>
           <div class="poin-text" id="poinCust">0</div>
-          <p style="margin:0; opacity: 0.9;">Green Points</p>
+          <p style="margin:0; opacity: 0.9; font-size: 0.9rem;">Green Points</p>
         </div>
-        <h5 style="margin-bottom:10px;">Katalog Hadiah</h5>
+
+        <!-- ==================== BAGIAN 3 BANNER PROMO ==================== -->
+        <div class="promo-section">
+          <div class="promo-title"><span>📢</span> Promo & Info Spesial Untukmu</div>
+          
+          <div class="slider-wrapper">
+            <div class="promo-container" id="promoContainer">
+              
+              <!-- BANNER PROMO 1 -->
+              <div class="promo-card" style="border: none;">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSLmiRj7aLnAa4LpHKITNaBdWRTZIPC9WEFQ&s" alt="Promo 1">
+              </div>
+              
+              <!-- BANNER PROMO 2 -->
+              <div class="promo-card" style="border: none;">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe_vo_nbhLzWPPNFjp3nQcfBVEM_YKbsBWRw&s" alt="Promo 2">
+              </div>
+
+              <!-- BANNER PROMO 3 -->
+              <div class="promo-card" style="border: none;">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGy3EYDOB4ZCUGpsWxDS3pHrvvvgRUL5toMg&s" alt="Promo 3">
+              </div>
+
+            </div>
+          </div>
+          
+          <!-- Titik-titik navigasi bawah -->
+          <div class="slider-dots" id="sliderDots"></div>
+        </div>
+
+        <h5 style="margin-bottom:10px; font-weight: bold; color: #444;">Katalog Hadiah</h5>
         <div id="listHadiah"></div>
       </div>
       
       <div style="text-align:center; margin-top:20px;">
-        <p id="linkDaftar"><a href="registrasi.html" style="color:var(--primary);">Belum punya akun? Daftar</a></p>
+        <p id="linkDaftar"><a href="registrasi.html" style="color:var(--primary); font-weight: 600; text-decoration: none;">Belum punya akun? Daftar Sekarang</a></p>
         <button id="btnCekLain" class="btn btn-gps hidden" style="background:#6c757d" onclick="resetDashboard()">« Cek Nomor Lain</button>
       </div>
     </div>
   </div>
 
+  <!-- Modal Konfirmasi PIN -->
   <div id="pinModal" class="modal">
     <div class="modal-content">
       <h3 style="margin:0; color:var(--primary);">Konfirmasi PIN</h3>
       <p style="font-size:0.85rem; color:#666;">Silakan masukkan PIN transaksi Anda</p>
-      <input type="password" id="pinInputan" class="modal-input" maxlength="6" inputmode="numeric" placeholder="••••••">
+      <input type="password" id="pinInputan" class="modal-input" maxlength="6" inputmode="numeric" placeholder="•••••">
       <button id="btnKonfirmasi" class="btn-confirm" onclick="eksekusiTukar()">TUKAR SEKARANG</button>
       <div class="btn-cancel" onclick="tutupModal()">Batalkan</div>
     </div>
@@ -72,8 +163,13 @@
     let memberIdTemp = "";
     let hadiahTemp = "";
     let currentPoinUser = 0;
+    
+    // Variabel Pengaturan Auto-Slide Banner
+    let intervalPromo;
+    let indeksPromoSekarang = 0;
 
     function resetDashboard() {
+      clearInterval(intervalPromo); 
       document.getElementById('dashboard').classList.add('hidden');
       document.getElementById('loginSection').classList.remove('hidden');
       document.getElementById('linkDaftar').classList.remove('hidden');
@@ -81,11 +177,9 @@
       document.getElementById('idCek').value = "";
     }
 
-    // Fungsi pembantu untuk memanggil skrip lintas domain (JSONP)
     function panggilJSONP(url, namaCallback) {
       const scriptLama = document.getElementById('jsonp-script');
       if (scriptLama) scriptLama.remove();
-      
       const script = document.createElement('script');
       script.id = 'jsonp-script';
       script.src = `${url}&prefix=${namaCallback}&t=${new Date().getTime()}`;
@@ -104,7 +198,6 @@
       panggilJSONP(`${API_URL}?action=cekPoin&id=${id}`, "callbackCekPoin");
     }
 
-    // Callback penanganan Cek Poin
     window.callbackCekPoin = function(res) {
       const btnCek = document.getElementById('btnCek');
       btnCek.innerText = "Cek";
@@ -119,12 +212,42 @@
         document.getElementById('poinCust').innerText = res.data.poin;
         currentPoinUser = res.data.poin;
         
-        // Lanjut load katalog
+        inisialisasiAutoSlide();
+
         panggilJSONP(`${API_URL}?action=getKatalog`, "callbackKatalog");
       } else {
         alert(res.message || "Member tidak ditemukan.");
       }
     };
+
+    function inisialisasiAutoSlide() {
+      const container = document.getElementById('promoContainer');
+      const dotsContainer = document.getElementById('sliderDots');
+      const totalPromo = container.children.length;
+      
+      indeksPromoSekarang = 0;
+      container.style.transform = `translateX(0%)`;
+      dotsContainer.innerHTML = "";
+      clearInterval(intervalPromo);
+
+      if (totalPromo <= 1) return;
+
+      for (let i = 0; i < totalPromo; i++) {
+        const dot = document.createElement('div');
+        dot.className = `dot ${i === 0 ? 'active' : ''}`;
+        dotsContainer.appendChild(dot);
+      }
+
+      intervalPromo = setInterval(() => {
+        indeksPromoSekarang = (indeksPromoSekarang + 1) % totalPromo;
+        container.style.transform = `translateX(-${indeksPromoSekarang * 100}%)`;
+        
+        const dots = dotsContainer.children;
+        for (let j = 0; j < dots.length; j++) {
+          dots[j].classList.toggle('active', j === indeksPromoSekarang);
+        }
+      }, 4000); 
+    }
 
     window.callbackKatalog = function(res) {
       if (res.status === "success") {
@@ -175,7 +298,7 @@
       alert(res.message);
       if (res.status === "success") {
         tutupModal();
-        loadDashboard(); // Refresh poin otomatis
+        loadDashboard(); 
       }
     };
   </script>
