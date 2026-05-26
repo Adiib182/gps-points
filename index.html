@@ -10,9 +10,15 @@
     .container { max-width: 450px; margin: auto; }
     .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
     
-    /* Branding & Logo */
+    /* Branding & Logo - DIPERBESAR AGAR LEBIH PROPORSIONAL */
     .brand-header { text-align: center; margin-bottom: 20px; }
-    .brand-logo { max-width: 120px; height: auto; margin-bottom: 10px; border-radius: 8px; }
+    .brand-logo { 
+      width: 100%; 
+      max-width: 180px; /* Batas lebar logo ditingkatkan dari 120px ke 180px agar lebih jelas */
+      height: auto; 
+      margin-bottom: 10px; 
+      border-radius: 8px; 
+    }
     .brand-header h4 { color: var(--primary); font-weight: 800; margin: 0; letter-spacing: 0.5px; }
     
     /* Auto Promo Banner Section */
@@ -36,13 +42,12 @@
       padding: 0; /* Di-nolkan agar gambar penuh sampai ujung */
     }
     
-    /* Proteksi Gambar agar tidak gepeng/tarik paksa */
+    /* Proteksi Gambar - DIUBAH MENJADI FILL AGAR MELEBAR PAS PENUH KOTAK */
     .promo-card img {
       width: 100%;
-  height: 100%;
-  object-fit: contain; /* Gambar dijamin utuh 100% tanpa terpotong */
-  background-color: #ffffff; /* Memberi warna latar putih jika banner kurang lebar */
-  display: block;
+      height: 100%;
+      object-fit: fill; /* Gambar otomatis mengisi dan menyesuaikan lebar kotak secara penuh */
+      display: block;
     }
     
     /* Titik Indikator di Bawah Banner */
@@ -284,7 +289,7 @@
 
       alert(res.message);
       if (res.status === "success") {
-        tutupModal();
+        t統合Modal();
         loadDashboard(); 
       }
     };
