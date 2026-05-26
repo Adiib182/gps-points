@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Rekap Penukaran Hadiah</title>
+  <style>
+    :root { --primary: #ff9800; --bg: #f8f9fa; }
+    body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: #333; margin: 0; padding: 15px; }
+    .container { max-width: 650px; margin: 0 auto; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h4 { color: #e65100; text-align: center; margin-bottom: 20px; }
+    .search-container { margin-bottom: 15px; display: flex; gap: 8px; }
+    #search-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th { background: #fff3e0; color: #e65100; padding: 12px 8px; border-bottom: 2px solid #ffcc80; text-align: left; }
+    td { padding: 12px 8px; border-bottom: 1px solid #eee; }
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
+    .sudah { background: #e8f5e9; color: #2e7d32; }
+    .btn-action { background: #2e7d32; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; }
+    .btn-nav { background: #eee; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .btn-nav:disabled { opacity: 0.4; cursor: not-allowed; }
+    #login-rekap { display: block; }
+    #content-rekap { display: none; }
+    #loading-text { text-align: center; font-weight: bold; color: #666; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="login-rekap" class="card">
+      <h4>AKSES REKAP ADMIN</h4>
+      <input type="password" id="pass-rekap" style="width:100%; padding:12px; margin-bottom:10px; box-sizing:border-box;" placeholder="Masukkan Password">
+      <button onclick="cekLoginRekap()" style="width:100%; padding:12px; background:#e65100; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">BUKA REKAP</button>
+      <p id="err" style="color:red; text-align:center; font-size:0.8rem;"></p>
+    </div>
+
+    <div id="content-rekap">
+      <div class="card">
+        <h4>REKAP PENUKARAN HADIAH</h4>
+        
+        <div class="search-container">
+          <input type="text" id="search-input" placeholder="Cari ID Member / No HP..." onkeyup="filterData()">
+        </div>
+        
+        <div id="loading-text" style="display: none;">Memperbarui data...</div>
+
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Member</th>
+                <th>Hadiah</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tabel-body"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button id="prevBtn" class="btn-nav" onclick="changePage(-1)">« Prev</button>
+          <span id="pageInfo">Hal 1</span>
+          <button id="nextBtn" class="btn-nav" onclick="changePage(1)">Next »</button>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="admin-page.html" style="color:#777; text-decoration:none; font-size: 0.9rem;">« Kembali ke Input Poin</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec;
+    const PASS_BENAR = "123";
+    
+    let allData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
+
+    function cekLoginRekap() {
+      if(document.getElementById('pass-rekap').value === PASS_BENAR) {
+        document.getElementById('login-rekap').style.display = 'none';
+        document.getElementById('content-rekap').style.display = 'block';
+        loadData();
+      } else {
+        document.getElementById('err').innerText = "Password Salah!";
+      }
+    }
+
+    async function loadData() {
+      const loader = document.getElementById('loading-text');
+      loader.style.display = "block";
+      try {
+        const response = await fetch(`${API_URL}?action=getLogTransaksi`);
+        const res = await response.json();
+        
+        if (res.status === "success") {
+          allData = res.data;
+          filterData(); 
+        } else {
+          alert("Gagal memuat data log transaksi.");
+        }
+      } catch (error) {
+        alert("Gagal terhubung ke server backend.");
+      } finally {
+        loader.style.display = "none";
+      }
+    }
+
+    function filterData() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      
+      filteredData = allData.filter(item => 
+        item[2].toString().toLowerCase().includes(search)
+      );
+
+      filteredData.sort((a, b) => {
+        if (a[4] === b[4]) return 0;
+        return a[4] === "BELUM DIAMBIL" ? -1 : 1;
+      });
+
+      currentPage = 1; 
+      renderTabel();
+    }
+
+    function renderTabel() {
+      const tbody = document.getElementById('tabel-body');
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const paginatedItems = filteredData.slice(start, end);
+
+      if (paginatedItems.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center'>Data tidak ditemukan.</td></tr>";
+        updateNav();
+        return;
+      }
+
+      let html = "";
+      paginatedItems.forEach(item => {
+        const rowIdx = item[0];
+        const status = item[4];
+        let aksi = status === "BELUM DIAMBIL" 
+          ? `<button class="btn-action" onclick="tandaiSelesai(${rowIdx}, this)">Selesai</button>` 
+          : `<span class="status-badge sudah">DIAMBIL</span>`;
+
+        html += `<tr>
+          <td>${item[1]}</td>
+          <td>${item[2]}</td>
+          <td>${item[3].replace("Tukar Hadiah: ", "")}</td>
+          <td>${aksi}</td>
+        </tr>`;
+      });
+      
+      tbody.innerHTML = html;
+      updateNav();
+    }
+
+    function updateNav() {
+      const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+      document.getElementById('pageInfo').innerText = `Hal ${currentPage} dari ${totalPages}`;
+      document.getElementById('prevBtn').disabled = (currentPage === 1);
+      document.getElementById('nextBtn').disabled = (currentPage === totalPages);
+    }
+
+    function changePage(dir) {
+      currentPage += dir;
+      renderTabel();
+    }
+
+    async function tandaiSelesai(baris, btn) {
+      if(!confirm("Sudah diberikan?")) return;
+      
+      btn.innerText = "...";
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}?action=tandaiHadiahDiberikan&rowIdx=${baris}`);
+        const res = await response.json();
+        
+        alert(res.message);
+        if (res.status === "success") {
+          await loadData(); 
+        }
+      } catch (error) {
+        alert("Gagal mengubah status.");
+      } finally {
+        if(btn) {
+          btn.innerText = "Selesai";
+          btn.disabled = false;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
