@@ -57,7 +57,10 @@
 
       try {
         const encodeNama = encodeURIComponent(n);
-        const response = await fetch(`${API_URL}?action=daftarMember&nama=${encodeNama}&noHP=${h}&pin=${p}`);
+        const response = await fetch(`${API_URL}?action=daftarMember&nama=${encodeNama}&noHP=${h}&pin=${p}`, {
+          method: "GET",
+          redirect: "follow"
+        });
         const res = await response.json();
 
         if(res.status === "success") {
@@ -69,6 +72,7 @@
           btn.disabled = false;
         }
       } catch (error) {
+        console.error(error);
         alert("Gagal terhubung ke server backend.");
         btn.innerText = "GABUNG SEKARANG";
         btn.disabled = false;
