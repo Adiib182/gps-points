@@ -36,11 +36,6 @@
       padding: 0; /* Di-nolkan agar gambar penuh sampai ujung */
     }
     
-    /* Desain teks promo bawaan agar tetap rapi */
-    .promo-card .text-promo-content { padding: 15px; }
-    .promo-card h5 { margin: 0 0 5px 0; color: #e65100; font-size: 0.9rem; }
-    .promo-card p { margin: 0; font-size: 0.78rem; color: #666; line-height: 1.4; }
-    
     /* Proteksi Gambar agar tidak gepeng/tarik paksa */
     .promo-card img {
       width: 100%;
@@ -87,53 +82,45 @@
   <div class="container">
     <div class="card">
       
-      <!-- ==================== BAGIAN LOGO ANDA ==================== -->
       <div class="brand-header">
-        <img class="brand-logo" src="https://lh3.googleusercontent.com/d/1hvfGiU2VzTQuxjteTFIPqdE1dTEecaXG" alt="Logo GPS">
+        <img class="brand-logo" src="https://placehold.co/200x200/2e7d32/white?text=GPS+LOGO" alt="Logo GPS">
         <h4>GREEN PRAMUKA SQUARE</h4>
       </div>
       
-      <!-- Bagian Input Cek Poin Nomor HP -->
       <div class="input-group" id="loginSection">
         <input type="text" id="idCek" placeholder="Masukkan No HP...">
         <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek</button>
       </div>
 
-      <!-- Tampilan Dasbor Member Setelah Berhasil Cek -->
+      <div class="promo-section">
+        <div class="promo-title"><span>📢</span> Promo & Info Spesial Untukmu</div>
+        
+        <div class="slider-wrapper">
+          <div class="promo-container" id="promoContainer">
+            
+            <div class="promo-card" style="border: none;">
+              <img src="https://drive.google.com/uc?export=view&id=1frm1qmVIkmVIRmvvsfrCw9Ee03ieEwZe" alt="Promo 1">
+            </div>
+            
+            <div class="promo-card" style="border: none;">
+              <img src="https://drive.google.com/uc?export=view&id=1frm1qmVIkmVIRmvvsfrCw9Ee03ieEwZe" alt="Promo 2">
+            </div>
+
+            <div class="promo-card" style="border: none;">
+              <img src="https://drive.google.com/uc?export=view&id=1frm1qmVIkmVIRmvvsfrCw9Ee03ieEwZe" alt="Promo 3">
+            </div>
+
+          </div>
+        </div>
+        
+        <div class="slider-dots" id="sliderDots"></div>
+      </div>
+
       <div id="dashboard" class="hidden">
         <div class="hero">
           <h6 id="namaCust" style="margin:0; font-size: 1rem; letter-spacing: 0.5px;">-</h6>
           <div class="poin-text" id="poinCust">0</div>
           <p style="margin:0; opacity: 0.9; font-size: 0.9rem;">Green Points</p>
-        </div>
-
-        <!-- ==================== BAGIAN 3 BANNER PROMO ==================== -->
-        <div class="promo-section">
-          <div class="promo-title"><span>📢</span> Promo & Info Spesial Untukmu</div>
-          
-          <div class="slider-wrapper">
-            <div class="promo-container" id="promoContainer">
-              
-              <!-- BANNER PROMO 1 -->
-              <div class="promo-card" style="border: none;">
-                <img src="https://drive.google.com/uc?export=view&id=1frm1qmVIkmVIRmvvsfrCw9Ee03ieEwZe" alt="Promo 1">
-              </div>
-              
-              <!-- BANNER PROMO 2 -->
-              <div class="promo-card" style="border: none;">
-                <img src="https://drive.google.com/uc?export=view&id=1frm1qmVIkmVIRmvvsfrCw9Ee03ieEwZe" alt="Promo 2">
-              </div>
-
-              <!-- BANNER PROMO 3 -->
-              <div class="promo-card" style="border: none;">
-                <img src="https://drive.google.com/uc?export=view&id=1frm1qmVIkmVIRmvvsfrCw9Ee03ieEwZe" alt="Promo 3">
-              </div>
-
-            </div>
-          </div>
-          
-          <!-- Titik-titik navigasi bawah -->
-          <div class="slider-dots" id="sliderDots"></div>
         </div>
 
         <h5 style="margin-bottom:10px; font-weight: bold; color: #444;">Katalog Hadiah</h5>
@@ -147,7 +134,6 @@
     </div>
   </div>
 
-  <!-- Modal Konfirmasi PIN -->
   <div id="pinModal" class="modal">
     <div class="modal-content">
       <h3 style="margin:0; color:var(--primary);">Konfirmasi PIN</h3>
@@ -159,17 +145,20 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyJ_A34WEOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec";
     let memberIdTemp = "";
     let hadiahTemp = "";
     let currentPoinUser = 0;
     
-    // Variabel Pengaturan Auto-Slide Banner
     let intervalPromo;
     let indeksPromoSekarang = 0;
 
+    // Otomatis menjalankan slider begitu halaman web terbuka
+    document.addEventListener("DOMContentLoaded", function() {
+      inisialisasiAutoSlide();
+    });
+
     function resetDashboard() {
-      clearInterval(intervalPromo); 
       document.getElementById('dashboard').classList.add('hidden');
       document.getElementById('loginSection').classList.remove('hidden');
       document.getElementById('linkDaftar').classList.remove('hidden');
@@ -212,8 +201,6 @@
         document.getElementById('poinCust').innerText = res.data.poin;
         currentPoinUser = res.data.poin;
         
-        inisialisasiAutoSlide();
-
         panggilJSONP(`${API_URL}?action=getKatalog`, "callbackKatalog");
       } else {
         alert(res.message || "Member tidak ditemukan.");
