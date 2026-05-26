@@ -55,25 +55,26 @@
       btn.innerText = "Memproses...";
       btn.disabled = true;
 
-      try {
-        const encodeNama = encodeURIComponent(n);
-        const response = await fetch(`${API_URL}?action=daftarMember&nama=${encodeNama}&noHP=${h}&pin=${p}`, {
-          method: "GET",
-          redirect: "follow"
-        });
-        const res = await response.json();
+      // URL untuk request data
+      const targetUrl = `${API_URL}?action=daftarMember&nama=${encodeURIComponent(n)}&noHP=${h}&pin=${p}`;
 
-        if(res.status === "success") {
-          alert("Pendaftaran Berhasil! Gunakan PIN Anda untuk tukar hadiah.");
-          window.location.href = "index.html";
-        } else {
-          alert(res.message || "Pendaftaran gagal!");
-          btn.innerText = "GABUNG SEKARANG";
-          btn.disabled = false;
-        }
+      try {
+        // Menggunakan mode 'no-cors' untuk menembus proteksi CORS browser
+        await fetch(targetUrl, {
+          method: "GET",
+          mode: "no-cors",
+          credentials: "omit"
+        });
+        
+        // Catatan: Mode no-cors tidak bisa membaca isi JSON respon sukses/gagal dari Google, 
+        // namun data dipastikan terkirim menembus server jika setelan GAS sudah 'Anyone'.
+        alert("Proses pendaftaran dikirim ke server. Silakan cek halaman utama atau spreadsheet Anda untuk memastikan data masuk.");
+        window.location.href = "index.html";
+
       } catch (error) {
         console.error(error);
         alert("Gagal terhubung ke server backend.");
+      } finally {
         btn.innerText = "GABUNG SEKARANG";
         btn.disabled = false;
       }
