@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Member GPS</title>
+  <style>
+    :root { --primary: #2e7d32; --bg: #f8f9fa; }
+    body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: #333; margin: 0; padding: 20px; }
+    .container { max-width: 400px; margin: 20px auto; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h4 { color: var(--primary); text-align: center; margin-bottom: 5px; }
+    p { color: #666; font-size: 0.85rem; text-align: center; margin-bottom: 20px; }
+    label { font-size: 0.85rem; color: #666; display: block; margin-bottom: 5px; }
+    input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
+    .btn-main { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .btn-main:disabled { background: #a5d6a7; }
+    .btn-link { width: 100%; padding: 10px; background: none; border: none; color: #777; cursor: pointer; font-size: 0.9rem; margin-top: 10px; text-decoration: none; display: block; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="card">
+      <h4>Daftar Member GPS</h4>
+      <p>Dapatkan 1 poin setiap belanja kelipatan Rp 10.000</p>
+      
+      <label>Nama Lengkap:</label>
+      <input type="text" id="regNama" placeholder="Contoh: Budi Santoso">
+      
+      <label>Nomor WhatsApp:</label>
+      <input type="number" id="regHP" placeholder="Contoh: 8123456789">
+
+      <label>Buat PIN Transaksi (6 Digit):</label>
+      <input type="password" id="regPIN" maxlength="6" inputmode="numeric" placeholder="Contoh: 123456">
+      <small style="display:block; color:#888; margin-top:-10px; margin-bottom:15px; font-size:0.7rem;">*PIN ini digunakan saat menukar hadiah.</small>
+      
+      <button id="btnDaftar" class="btn-main" onclick="daftar()">GABUNG SEKARANG</button>
+      <a href="index.html" class="btn-link">Batal / Kembali</a>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec;
+
+    async function daftar() {
+      const n = document.getElementById('regNama').value;
+      const h = document.getElementById('regHP').value;
+      const p = document.getElementById('regPIN').value;
+      const btn = document.getElementById('btnDaftar');
+      
+      if(!n || !h || !p) return alert("Lengkapi semua data termasuk PIN!");
+      if(p.length < 4) return alert("PIN minimal 4 - 6 digit!");
+      
+      btn.innerText = "Memproses...";
+      btn.disabled = true;
+
+      try {
+        const encodeNama = encodeURIComponent(n);
+        const response = await fetch(`${API_URL}?action=daftarMember&nama=${encodeNama}&noHP=${h}&pin=${p}`);
+        const res = await response.json();
+
+        if(res.status === "success") {
+          alert("Pendaftaran Berhasil! Gunakan PIN Anda untuk tukar hadiah.");
+          window.location.href = "index.html";
+        } else {
+          alert(res.message || "Pendaftaran gagal!");
+          btn.innerText = "GABUNG SEKARANG";
+          btn.disabled = false;
+        }
+      } catch (error) {
+        alert("Gagal terhubung ke server backend.");
+        btn.innerText = "GABUNG SEKARANG";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
