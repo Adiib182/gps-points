@@ -97,7 +97,7 @@
       const loader = document.getElementById('loading-text');
       loader.style.display = "block";
       try {
-        const response = await fetch(`${API_URL}?action=getLogTransaksi`);
+        const response = await fetch(`${API_URL}?action=getLogTransaksi`, { method: "GET", redirect: "follow" });
         const res = await response.json();
         
         if (res.status === "success") {
@@ -180,7 +180,7 @@
       btn.disabled = true;
 
       try {
-        const response = await fetch(`${API_URL}?action=tandaiHadiahDiberikan&rowIdx=${baris}`);
+        const response = await fetch(`${API_URL}?action=tandaiHadiahDiberikan&rowIdx=${baris}`, { method: "GET", redirect: "follow" });
         const res = await response.json();
         
         alert(res.message);
