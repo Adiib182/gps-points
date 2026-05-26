@@ -10,11 +10,11 @@
     .container { max-width: 450px; margin: auto; }
     .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
     
-    /* Branding & Logo - DIPERBESAR AGAR LEBIH PROPORSIONAL */
+    /* Branding & Logo */
     .brand-header { text-align: center; margin-bottom: 20px; }
     .brand-logo { 
       width: 100%; 
-      max-width: 180px; /* Batas lebar logo ditingkatkan dari 120px ke 180px agar lebih jelas */
+      max-width: 180px; 
       height: auto; 
       margin-bottom: 10px; 
       border-radius: 8px; 
@@ -31,22 +31,23 @@
     /* Jalur geser dalam */
     .promo-container { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
     
-    /* Tiap banner promo mengisi 100% lebar slider dengan tinggi terkunci */
+    /* Tiap banner promo */
     .promo-card { 
       flex: 0 0 100%; 
       background: #fff8e1; 
       border-left: 5px solid var(--accent); 
       box-sizing: border-box; 
-      height: 140px; /* Mengunci tinggi banner agar seragam semua */
+      height: 140px; 
       overflow: hidden;
-      padding: 0; /* Di-nolkan agar gambar penuh sampai ujung */
+      padding: 0; 
+      cursor: pointer; /* Mengubah kursor menjadi jari penunjuk saat banner didekati */
     }
     
-    /* Proteksi Gambar - DIUBAH MENJADI FILL AGAR MELEBAR PAS PENUH KOTAK */
+    /* Proteksi Gambar */
     .promo-card img {
       width: 100%;
       height: 100%;
-      object-fit: fill; /* Gambar otomatis mengisi dan menyesuaikan lebar kotak secara penuh */
+      object-fit: fill; 
       display: block;
     }
     
@@ -72,14 +73,44 @@
     .btn-disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
     .hidden { display: none; }
     
-    /* Modal PIN */
+    /* Modal PIN & MODAL IMAGE PREVIEW */
     .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
     .modal-content { background: white; margin: 20% auto; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; animation: slideDown 0.3s ease-out; }
+    
+    /* Gaya Khusus untuk Pop-up Pembesar Gambar */
+    .image-modal-content {
+      background: transparent;
+      margin: 15% auto;
+      padding: 0;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      animation: zoomIn 0.3s ease-out;
+    }
+    .image-modal-content img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+    }
+    .close-image-modal {
+      position: absolute;
+      top: -35px;
+      right: 5px;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
     .modal-input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #eee; border-radius: 10px; text-align: center; font-size: 1.5rem; letter-spacing: 8px; box-sizing: border-box; outline: none; }
     .modal-input:focus { border-color: var(--primary); }
     .btn-confirm { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     .btn-cancel { margin-top: 15px; color: #888; font-size: 0.85rem; cursor: pointer; display: inline-block; text-decoration: underline; }
+    
     @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -103,15 +134,15 @@
         <div class="slider-wrapper">
           <div class="promo-container" id="promoContainer">
             
-            <div class="promo-card" style="border: none;">
+            <div class="promo-card" style="border: none;" onclick="perbesarBanner(this)">
               <img src="https://i.ibb.co.com/WXgJhNB/2.jpg" alt="Promo 1">
             </div>
             
-            <div class="promo-card" style="border: none;">
+            <div class="promo-card" style="border: none;" onclick="perbesarBanner(this)">
               <img src="https://i.ibb.co.com/WXgJhNB/2.jpg" alt="Promo 2">
             </div>
 
-            <div class="promo-card" style="border: none;">
+            <div class="promo-card" style="border: none;" onclick="perbesarBanner(this)">
               <img src="https://i.ibb.co.com/WXgJhNB/2.jpg" alt="Promo 3">
             </div>
 
@@ -149,6 +180,13 @@
     </div>
   </div>
 
+  <div id="imageModal" class="modal" onclick="tutupPreviewBanner()">
+    <div class="image-modal-content" onclick="event.stopPropagation()">
+      <span class="close-image-modal" onclick="tutupPreviewBanner()">&times;</span>
+      <img id="imgPreviewTarget" src="" alt="Preview Banner">
+    </div>
+  </div>
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyJ_A34WEOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec";
     let memberIdTemp = "";
@@ -158,10 +196,21 @@
     let intervalPromo;
     let indeksPromoSekarang = 0;
 
-    // Otomatis menjalankan slider begitu halaman web terbuka
     document.addEventListener("DOMContentLoaded", function() {
       inisialisasiAutoSlide();
     });
+
+    /* ==================== FUNGSI BARU UNTUK MODAL BANNER ==================== */
+    function perbesarBanner(element) {
+      const srcGambar = element.querySelector('img').src;
+      document.getElementById('imgPreviewTarget').src = srcGambar;
+      document.getElementById('imageModal').style.display = 'block';
+    }
+
+    function tutupPreviewBanner() {
+      document.getElementById('imageModal').style.display = 'none';
+    }
+    /* ======================================================================== */
 
     function resetDashboard() {
       document.getElementById('dashboard').classList.add('hidden');
@@ -289,7 +338,7 @@
 
       alert(res.message);
       if (res.status === "success") {
-        t統合Modal();
+        tutupModal();
         loadDashboard(); 
       }
     };
