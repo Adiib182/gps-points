@@ -39,10 +39,10 @@
     /* Proteksi Gambar agar tidak gepeng/tarik paksa */
     .promo-card img {
       width: 100%;
-      height: 100%;
-      object-fit: cover; /* Efek wallpaper: auto-crop proporsional */
-      object-position: center; /* Fokus di tengah gambar */
-      display: block;
+  height: 100%;
+  object-fit: contain; /* Gambar dijamin utuh 100% tanpa terpotong */
+  background-color: #ffffff; /* Memberi warna latar putih jika banner kurang lebar */
+  display: block;
     }
     
     /* Titik Indikator di Bawah Banner */
