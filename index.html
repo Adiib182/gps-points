@@ -69,10 +69,10 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec";
-
     let memberIdTemp = "";
     let hadiahTemp = "";
-    
+    let currentPoinUser = 0;
+
     function resetDashboard() {
       document.getElementById('dashboard').classList.add('hidden');
       document.getElementById('loginSection').classList.remove('hidden');
@@ -80,8 +80,19 @@
       document.getElementById('btnCekLain').classList.add('hidden');
       document.getElementById('idCek').value = "";
     }
+
+    // Fungsi pembantu untuk memanggil skrip lintas domain (JSONP)
+    function panggilJSONP(url, namaCallback) {
+      const scriptLama = document.getElementById('jsonp-script');
+      if (scriptLama) scriptLama.remove();
+      
+      const script = document.createElement('script');
+      script.id = 'jsonp-script';
+      script.src = `${url}&prefix=${namaCallback}&t=${new Date().getTime()}`;
+      document.body.appendChild(script);
+    }
     
-    async function loadDashboard() {
+    function loadDashboard() {
       const id = document.getElementById('idCek').value;
       if(!id) return alert("Silakan masukkan nomor HP.");
       
@@ -89,52 +100,48 @@
       btnCek.innerText = "Memuat...";
       btnCek.disabled = true;
 
-      try {
-        const response = await fetch(`${API_URL}?action=cekPoin&id=${id}`, { method: "GET", redirect: "follow" });
-        const res = await response.json();
-
-        if(res.status === "success") {
-          document.getElementById('loginSection').classList.add('hidden');
-          document.getElementById('dashboard').classList.remove('hidden');
-          document.getElementById('linkDaftar').classList.add('hidden');
-          document.getElementById('btnCekLain').classList.remove('hidden');
-          document.getElementById('namaCust').innerText = res.data.nama;
-          document.getElementById('poinCust').innerText = res.data.poin;
-          await loadKatalog(id, res.data.poin);
-        } else { 
-          alert(res.message || "Member tidak ditemukan."); 
-        }
-      } catch (error) {
-        alert("Gagal terhubung ke server backend.");
-      } finally {
-        btnCek.innerText = "Cek";
-        btnCek.disabled = false;
-      }
+      memberIdTemp = id;
+      panggilJSONP(`${API_URL}?action=cekPoin&id=${id}`, "callbackCekPoin");
     }
 
-    async function loadKatalog(id, poinUser) {
-      try {
-        const response = await fetch(`${API_URL}?action=getKatalog`, { method: "GET", redirect: "follow" });
-        const res = await response.json();
+    // Callback penanganan Cek Poin
+    window.callbackCekPoin = function(res) {
+      const btnCek = document.getElementById('btnCek');
+      btnCek.innerText = "Cek";
+      btnCek.disabled = false;
 
-        if (res.status === "success") {
-          const container = document.getElementById('listHadiah');
-          container.innerHTML = "";
-          
-          res.data.forEach(item => {
-            const bisa = poinUser >= item.poin;
-            container.innerHTML += `<div class="hadiah-item">
-              <div><strong>${item.nama}</strong><br><small style="color:#666">${item.poin} Poin</small></div>
-              <button class="btn ${bisa ? 'btn-tukar' : 'btn-disabled'}" ${bisa ? `onclick="tukar('${id}', '${item.nama}')"` : 'disabled'}>
-                ${bisa ? 'Tukar' : 'Poin Kurang'}
-              </button>
-            </div>`;
-          });
-        }
-      } catch (error) {
-        console.error(error);
+      if(res.status === "success") {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('linkDaftar').classList.add('hidden');
+        document.getElementById('btnCekLain').classList.remove('hidden');
+        document.getElementById('namaCust').innerText = res.data.nama;
+        document.getElementById('poinCust').innerText = res.data.poin;
+        currentPoinUser = res.data.poin;
+        
+        // Lanjut load katalog
+        panggilJSONP(`${API_URL}?action=getKatalog`, "callbackKatalog");
+      } else {
+        alert(res.message || "Member tidak ditemukan.");
       }
-    }
+    };
+
+    window.callbackKatalog = function(res) {
+      if (res.status === "success") {
+        const container = document.getElementById('listHadiah');
+        container.innerHTML = "";
+        
+        res.data.forEach(item => {
+          const bisa = currentPoinUser >= item.poin;
+          container.innerHTML += `<div class="hadiah-item">
+            <div><strong>${item.nama}</strong><br><small style="color:#666">${item.poin} Poin</small></div>
+            <button class="btn ${bisa ? 'btn-tukar' : 'btn-disabled'}" ${bisa ? `onclick="tukar('${memberIdTemp}', '${item.nama}')"` : 'disabled'}>
+              ${bisa ? 'Tukar' : 'Poin Kurang'}
+            </button>
+          </div>`;
+        });
+      }
+    };
 
     function tukar(id, h) { 
       memberIdTemp = id;
@@ -148,7 +155,7 @@
       document.getElementById('pinModal').style.display = 'none';
     }
 
-    async function eksekusiTukar() {
+    function eksekusiTukar() {
       const pin = document.getElementById('pinInputan').value;
       if(!pin) return alert("PIN wajib diisi!");
 
@@ -156,24 +163,21 @@
       btn.innerText = "Memproses...";
       btn.disabled = true;
 
-      try {
-        const encodeHadiah = encodeURIComponent(hadiahTemp);
-        const response = await fetch(`${API_URL}?action=tukarPoin&id=${memberIdTemp}&namaHadiah=${encodeHadiah}&pinInput=${pin}`, { method: "GET", redirect: "follow" });
-        const res = await response.json();
-
-        alert(res.message);
-        
-        if (res.status === "success") {
-          tutupModal();
-          await loadDashboard(); 
-        }
-      } catch (error) {
-        alert("Gagal melakukan penukaran poin.");
-      } finally {
-        btn.innerText = "TUKAR SEKARANG";
-        btn.disabled = false;
-      }
+      const encodeHadiah = encodeURIComponent(hadiahTemp);
+      panggilJSONP(`${API_URL}?action=tukarPoin&id=${memberIdTemp}&namaHadiah=${encodeHadiah}&pinInput=${pin}`, "callbackTukar");
     }
+
+    window.callbackTukar = function(res) {
+      const btn = document.getElementById('btnKonfirmasi');
+      btn.innerText = "TUKAR SEKARANG";
+      btn.disabled = false;
+
+      alert(res.message);
+      if (res.status === "success") {
+        tutupModal();
+        loadDashboard(); // Refresh poin otomatis
+      }
+    };
   </script>
 </body>
 </html>
