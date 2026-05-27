@@ -43,7 +43,18 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec";
 
-    async function daftar() {
+    // Fungsi Pembantu JSONP untuk menembus CORS Browser secara sempurna
+    function panggilJSONP(url, namaCallback) {
+      const scriptLama = document.getElementById('jsonp-script');
+      if (scriptLama) scriptLama.remove();
+      
+      const script = document.createElement('script');
+      script.id = 'jsonp-script';
+      script.src = `${url}&prefix=${namaCallback}&t=${new Date().getTime()}`;
+      document.body.appendChild(script);
+    }
+
+    function daftar() {
       const n = document.getElementById('regNama').value;
       const h = document.getElementById('regHP').value;
       const p = document.getElementById('regPIN').value;
@@ -55,30 +66,24 @@
       btn.innerText = "Memproses...";
       btn.disabled = true;
 
-      // URL untuk request data
+      // Kirim request ke GAS menggunakan sistem JSONP callback
       const targetUrl = `${API_URL}?action=daftarMember&nama=${encodeURIComponent(n)}&noHP=${h}&pin=${p}`;
-
-      try {
-        // Menggunakan mode 'no-cors' untuk menembus proteksi CORS browser
-        await fetch(targetUrl, {
-          method: "GET",
-          mode: "no-cors",
-          credentials: "omit"
-        });
-        
-        // Catatan: Mode no-cors tidak bisa membaca isi JSON respon sukses/gagal dari Google, 
-        // namun data dipastikan terkirim menembus server jika setelan GAS sudah 'Anyone'.
-        alert("Proses pendaftaran berhasil.");
-        window.location.href = "index.html";
-
-      } catch (error) {
-        console.error(error);
-        alert("Pendaftaran gagal!");
-      } finally {
-        btn.innerText = "GABUNG SEKARANG";
-        btn.disabled = false;
-      }
+      panggilJSONP(targetUrl, "callbackDaftar");
     }
+
+    // Fungsi penangkap respon sukses/gagal dari Code.gs
+    window.callbackDaftar = function(res) {
+      const btn = document.getElementById('btnDaftar');
+      btn.innerText = "GABUNG SEKARANG";
+      btn.disabled = false;
+
+      if (res.status === "success") {
+        alert(res.message || "Pendaftaran Berhasil!");
+        window.location.href = "index.html"; // Kembali ke halaman login utama
+      } else {
+        alert(res.message || "Pendaftaran gagal!");
+      }
+    };
   </script>
 </body>
 </html>
