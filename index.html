@@ -296,11 +296,33 @@
         container.innerHTML = "";
         
         res.data.forEach(item => {
-          const bisa = currentPoinUser >= item.poin;
+          const poinCukup = currentPoinUser >= item.poin;
+          const stokTersedia = item.stok !== undefined && parseInt(item.stok) > 0;
+          
+          let teksTombol = "Tukar";
+          let kelasTombol = "btn-tukar";
+          let statusDisabled = "";
+
+          if (!stokTersedia) {
+            teksTombol = "Stok Habis";
+            kelasTombol = "btn-disabled";
+            statusDisabled = "disabled";
+          } else if (!poinCukup) {
+            teksTombol = "Poin Kurang";
+            kelasTombol = "btn-disabled";
+            statusDisabled = "disabled";
+          }
+
           container.innerHTML += `<div class="hadiah-item">
-            <div><strong>${item.nama}</strong><br><small style="color:#666">${item.poin} Poin</small></div>
-            <button class="btn ${bisa ? 'btn-tukar' : 'btn-disabled'}" ${bisa ? `onclick="tukar('${memberIdTemp}', '${item.nama}')"` : 'disabled'}>
-              ${bisa ? 'Tukar' : 'Poin Kurang'}
+            <div>
+              <strong>${item.nama}</strong><br>
+              <small style="color:#666">${item.poin} Poin</small> 
+              <span style="font-size: 0.75rem; color: ${parseInt(item.stok) <= 3 ? 'red' : '#2e7d32'}; font-weight: bold; margin-left: 5px;">
+                (Stok: ${item.stok})
+              </span>
+            </div>
+            <button class="btn ${kelasTombol}" ${statusDisabled} ${stokTersedia && poinCukup ? `onclick="tukar('${memberIdTemp}', '${item.nama}')"` : ''}>
+              ${teksTombol}
             </button>
           </div>`;
         });
