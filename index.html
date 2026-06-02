@@ -23,19 +23,16 @@
       color: var(--text-main); 
       display: flex;
       justify-content: center;
-      align-items: center;      /* Membuat kartu pas di tengah layar komputer secara vertikal */
-      min-height: 100vh;        /* Memastikan background memenuhi tinggi layar komputer */
-      padding: 40px 16px;       /* Jarak atas-bawah lebih longgar agar estetik di komputer */
+      align-items: center;      
+      min-height: 100vh;        
+      padding: 40px 16px;       
       box-sizing: border-box;
       position: relative;
       overflow-x: hidden;
-
-      /* Latar belakang gradasi hijau sangat lembut */
       background: radial-gradient(circle at 10% 20%, rgba(76, 175, 80, 0.06) 0%, rgba(244, 247, 245, 1) 90%);
       background-color: var(--bg); 
     }
     
-    /* Bulatan abstrak warna hijau di kanan atas komputer */
     body::before {
       content: "";
       position: fixed;
@@ -50,7 +47,6 @@
       right: -100px;
     }
 
-    /* Bulatan abstrak warna emas di kiri bawah komputer */
     body::after {
       content: "";
       position: fixed;
@@ -66,13 +62,13 @@
     }
 
     /* ==========================================================================
-       STRUKTUR KONTEN UTAMA (Sesuai File Asli)
+       STRUKTUR KONTEN UTAMA
        ========================================================================== */
     .container { 
       width: 100%;
       max-width: 420px; 
       margin: 0 auto;
-      z-index: 2; /* Menjaga kartu tetap di atas dekorasi background */
+      z-index: 2; 
     }
     
     .card { 
@@ -82,7 +78,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.06); 
     }
     
-    /* Branding & Logo */
     .brand-header { 
       text-align: center; 
       margin-bottom: 24px; 
@@ -101,7 +96,6 @@
       letter-spacing: 0.3px; 
     }
     
-    /* Input Form Group */
     .input-group { 
       display: flex; 
       gap: 8px; 
@@ -123,7 +117,6 @@
       box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
     }
     
-    /* Buttons */
     .btn { 
       padding: 12px 20px; 
       border-radius: 12px; 
@@ -135,7 +128,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 64px; /* Mengunci lebar minimal tombol cek agar konsisten */
+      min-width: 64px; 
     }
     .btn-gps { 
       background: var(--primary); 
@@ -148,7 +141,6 @@
       transform: scale(0.98);
     }
     
-    /* CSS ANIMASI BULATAN MUTER (SPINNER LOADING) */
     .spinner {
       width: 18px;
       height: 18px;
@@ -161,7 +153,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Global Section Title */
     .section-title { 
       font-size: 0.9rem; 
       font-weight: 700; 
@@ -181,6 +172,8 @@
       overflow: hidden; 
       border-radius: 14px; 
       box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+      position: relative;
+      touch-action: pan-y; /* Membantu swipe horizontal agar tidak mengganggu scroll vertikal halaman */
     }
     .promo-container { 
       display: flex; 
@@ -192,15 +185,16 @@
       height: 140px; 
       overflow: hidden;
       cursor: pointer; 
+      user-select: none;
     }
     .promo-card img {
       width: 100%;
       height: 100%;
       object-fit: fill; 
       display: block;
+      pointer-events: none; /* Mencegah bug bawaan browser saat gambar ditarik manual */
     }
     
-    /* Gaya Teks Panduan (Note) di luar gambar */
     .section-note {
       text-align: center; 
       font-size: 0.72rem; 
@@ -434,9 +428,6 @@
     @keyframes slideDown { from { transform: translateY(-40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes zoomIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    /* ==========================================================================
-       MEDIA QUERIES (OTOMATIS MENYESUAIKAN JIKA DIBUKA DI HP)
-       ========================================================================== */
     @media (max-width: 480px) {
       body {
         padding: 16px;         
@@ -466,7 +457,7 @@
 
       <div class="promo-section">
         <div class="section-title"><span>📢</span> Promo & Info Spesial Untukmu</div>
-        <div class="slider-wrapper">
+        <div class="slider-wrapper" id="sliderWrapper">
           <div class="promo-container" id="promoContainer">
             <div class="promo-card" onclick="perbesarBanner(this)">
               <img src="https://i.ibb.co.com/7dwdHFxJ/ABSOLUTEA-Green-Pramuka-Square-Opening-Promo-Beli-1-Gratis-1.jpg" alt="Promo 1">
@@ -479,7 +470,7 @@
             </div>
           </div>
         </div> 
-        <p class="section-note">🔍 Ketuk gambar untuk memperbesar detail promo</p>
+        <p class="section-note">🔍 Geser atau ketuk gambar untuk memperbesar promo</p>
         <div class="slider-dots" id="sliderDots"></div>
       </div>
 
@@ -536,8 +527,13 @@
     let intervalPromo;
     let indeksPromoSekarang = 0;
 
+    // Variabel pendukung sistem Swipe Jari
+    let touchStartX = 0;
+    let touchEndX = 0;
+
     document.addEventListener("DOMContentLoaded", function() {
       inisialisasiAutoSlide();
+      aturFiturSwipeJari(); // Aktifkan pendeteksi geseran jari manual
     });
 
     function perbesarBanner(element) {
@@ -570,13 +566,11 @@
       document.body.appendChild(script);
     }
     
-    // MODIFIKASI TERKINI: Mengubah teks tombol menjadi spinner bulatan berputar saat diklik
     function loadDashboard() {
       const id = document.getElementById('idCek').value;
       if(!id) return alert("Silakan masukkan nomor HP.");
       
       const btnCek = document.getElementById('btnCek');
-      // Menghapus kata "Memuat..." dan menyisipkan elemen animasi bulatan berputar (spinner)
       btnCek.innerHTML = '<div class="spinner"></div>';
       btnCek.disabled = true;
 
@@ -586,7 +580,6 @@
 
     window.callbackCekPoin = function(res) {
       const btnCek = document.getElementById('btnCek');
-      // Mengembalikan tombol ke tulisan semula ketika data selesai dimuat
       btnCek.innerHTML = "Cek";
       btnCek.disabled = false;
 
@@ -604,6 +597,19 @@
         alert(res.message || "Member tidak ditemukan.");
       }
     };
+
+    // Fungsi update posisi slider banner agar sinkron otomatis & manual
+    function perbaruiPosisiSlider() {
+      const container = document.getElementById('promoContainer');
+      const dotsContainer = document.getElementById('sliderDots');
+      
+      container.style.transform = `translateX(-${indeksPromoSekarang * 100}%)`;
+      
+      const dots = dotsContainer.children;
+      for (let j = 0; j < dots.length; j++) {
+        dots[j].classList.toggle('active', j === indeksPromoSekarang);
+      }
+    }
 
     function inisialisasiAutoSlide() {
       const container = document.getElementById('promoContainer');
@@ -623,15 +629,51 @@
         dotsContainer.appendChild(dot);
       }
 
+      jalankanTimerAutoSlide(totalPromo);
+    }
+
+    function jalankanTimerAutoSlide(totalPromo) {
+      clearInterval(intervalPromo);
       intervalPromo = setInterval(() => {
         indeksPromoSekarang = (indeksPromoSekarang + 1) % totalPromo;
-        container.style.transform = `translateX(-${indeksPromoSekarang * 100}%)`;
+        perbaruiPosisiSlider();
+      }, 4000);
+    }
+
+    // UPDATE TERBARU: Menangkap input gerakan geser jari di layar HP
+    function aturFiturSwipeJari() {
+      const wrapper = document.getElementById('sliderWrapper');
+      const container = document.getElementById('promoContainer');
+      
+      wrapper.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      wrapper.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        evaluasiArahSwipe();
+      }, { passive: true });
+
+      function evaluasiArahSwipe() {
+        const totalPromo = container.children.length;
+        if (totalPromo <= 1) return;
+
+        const jarakGeserMinimal = 50; // Menentukan sensitivitas geseran dalam pixel
         
-        const dots = dotsContainer.children;
-        for (let j = 0; j < dots.length; j++) {
-          dots[j].classList.toggle('active', j === indeksPromoSekarang);
+        // JIKA DISWIPE KE KIRI (Melihat item berikutnya)
+        if (touchStartX - touchEndX > jarakGeserMinimal) {
+          indeksPromoSekarang = (indeksPromoSekarang + 1) % totalPromo;
+          perbaruiPosisiSlider();
+          jalankanTimerAutoSlide(totalPromo); // Reset timer otomatis agar tidak tabrakan setelah user geser manual
         }
-      }, 4000); 
+        
+        // JIKA DISWIPE KE KANAN (Melihat item sebelumnya)
+        if (touchEndX - touchStartX > jarakGeserMinimal) {
+          indeksPromoSekarang = (indeksPromoSekarang - 1 + totalPromo) % totalPromo;
+          perbaruiPosisiSlider();
+          jalankanTimerAutoSlide(totalPromo); // Reset timer otomatis
+        }
+      }
     }
 
     window.callbackKatalog = function(res) {
@@ -665,7 +707,7 @@
                 (Stok: ${item.stok})
               </span>
             </div>
-            <button class="btn ${kelasTombol}" ${statusDisabled} ${stokTersedia && poinCukup ? `onclick="tukar('${memberIdTemp}', '${item.nama}')"` : ''}>
+            <button class="btn ${kelasTombol}" ${statusDisabled} ${stokTersedia && poinCukup ? `onclick=\"tukar('${memberIdTemp}', '${item.nama}')\"` : ''}>
               ${teksTombol}
             </button>
           </div>`;
