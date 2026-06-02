@@ -5,45 +5,177 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Green Pramuka Square - Member Rewards</title>
   <style>
-    :root { --primary: #2e7d32; --accent: #ffb300; --bg: #f1f8e9; }
-    body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 450px; margin: auto; }
-    .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    :root { 
+      --primary: #2e7d32; 
+      --primary-light: #4caf50;
+      --accent: #ffb300; 
+      --bg: #f4f7f5; 
+      --text-main: #333333;
+      --text-muted: #666666;
+    }
+    
+    /* ==========================================================================
+       TAMPILAN BACKGROUND & TEMA UNTUK DESKTOP (KOMPUTER) - KONSEP 1
+       ========================================================================== */
+    body { 
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; 
+      margin: 0; 
+      color: var(--text-main); 
+      display: flex;
+      justify-content: center;
+      align-items: center;      /* Membuat kartu pas di tengah layar komputer secara vertikal */
+      min-height: 100vh;        /* Memastikan background memenuhi tinggi layar komputer */
+      padding: 40px 16px;       /* Jarak atas-bawah lebih longgar agar estetik di komputer */
+      box-sizing: border-box;
+      position: relative;
+      overflow-x: hidden;
+
+      /* Latar belakang gradasi hijau sangat lembut */
+      background: radial-gradient(circle at 10% 20%, rgba(76, 175, 80, 0.06) 0%, rgba(244, 247, 245, 1) 90%);
+      background-color: var(--bg); 
+    }
+    
+    /* Bulatan abstrak warna hijau di kanan atas komputer */
+    body::before {
+      content: "";
+      position: fixed;
+      border-radius: 50%;
+      z-index: -1;
+      filter: blur(70px);
+      opacity: 0.4;
+      width: 350px;
+      height: 350px;
+      background: var(--primary-light);
+      top: -100px;
+      right: -100px;
+    }
+
+    /* Bulatan abstrak warna emas di kiri bawah komputer */
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 50%;
+      z-index: -1;
+      filter: blur(70px);
+      opacity: 0.4;
+      width: 300px;
+      height: 300px;
+      background: var(--accent);
+      bottom: -100px;
+      left: -100px;
+    }
+
+    /* ==========================================================================
+       STRUKTUR KONTEN UTAMA (Sesuai File Asli)
+       ========================================================================== */
+    .container { 
+      width: 100%;
+      max-width: 420px; 
+      margin: 0 auto;
+      z-index: 2; /* Menjaga kartu tetap di atas dekorasi background */
+    }
+    
+    .card { 
+      background: white; 
+      padding: 24px 20px; 
+      border-radius: 20px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06); 
+    }
     
     /* Branding & Logo */
-    .brand-header { text-align: center; margin-bottom: 20px; }
+    .brand-header { 
+      text-align: center; 
+      margin-bottom: 24px; 
+    }
     .brand-logo { 
       width: 100%; 
-      max-width: 180px; 
+      max-width: 160px; 
       height: auto; 
-      margin-bottom: 10px; 
-      border-radius: 8px; 
+      margin-bottom: 12px; 
     }
-    .brand-header h4 { color: var(--primary); font-weight: 800; margin: 0; letter-spacing: 0.5px; }
+    .brand-header h4 { 
+      color: var(--primary); 
+      font-weight: 700; 
+      margin: 0; 
+      font-size: 0.95rem;
+      letter-spacing: 0.3px; 
+    }
+    
+    /* Input Form Group */
+    .input-group { 
+      display: flex; 
+      gap: 8px; 
+      margin-bottom: 24px;
+    }
+    input[type="text"] { 
+      flex: 1; 
+      padding: 14px 16px; 
+      border: 1px solid #e0e0e0; 
+      border-radius: 12px; 
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s ease;
+      background-color: #fafafa;
+    }
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      background-color: #fff;
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+    
+    /* Buttons */
+    .btn { 
+      padding: 12px 20px; 
+      border-radius: 12px; 
+      border: none; 
+      font-weight: 600; 
+      font-size: 0.95rem;
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+    .btn-gps { 
+      background: var(--primary); 
+      color: white; 
+    }
+    .btn-gps:hover {
+      background: #236026;
+    }
+    .btn-gps:active {
+      transform: scale(0.98);
+    }
+    
+    /* Global Section Title */
+    .section-title { 
+      font-size: 0.9rem; 
+      font-weight: 700; 
+      color: #444; 
+      margin-bottom: 10px; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+    }
     
     /* Auto Promo Banner Section */
-    .promo-section { margin: 15px 0 25px 0; position: relative; }
-    .promo-title { font-size: 0.9rem; font-weight: bold; color: #555; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-    
-    /* Pembungkus slider luar */
-    .slider-wrapper { width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    
-    /* Jalur geser dalam */
-    .promo-container { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
-    
-    /* Tiap banner promo */
+    .promo-section { 
+      margin-bottom: 24px; 
+    }
+    .slider-wrapper { 
+      width: 100%; 
+      overflow: hidden; 
+      border-radius: 14px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+    }
+    .promo-container { 
+      display: flex; 
+      transition: transform 0.5s ease-in-out; 
+      width: 100%; 
+    }
     .promo-card { 
       flex: 0 0 100%; 
-      background: #fff8e1; 
-      border-left: 5px solid var(--accent); 
-      box-sizing: border-box; 
       height: 140px; 
       overflow: hidden;
-      padding: 0; 
-      cursor: pointer; /* Mengubah kursor menjadi jari penunjuk saat banner didekati */
+      cursor: pointer; 
     }
-    
-    /* Proteksi Gambar */
     .promo-card img {
       width: 100%;
       height: 100%;
@@ -51,66 +183,254 @@
       display: block;
     }
     
-    /* Titik Indikator di Bawah Banner */
-    .slider-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
-    .dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; transition: 0.3s; }
-    .dot.active { background: var(--primary); width: 18px; border-radius: 4px; }
+    /* Gaya Teks Panduan (Note) di luar gambar */
+    .section-note {
+      text-align: center; 
+      font-size: 0.72rem; 
+      color: var(--text-muted); 
+      margin: 6px 0 0 0;
+      letter-spacing: 0.2px;
+    }
 
-    /* Input & Buttons */
-    .input-group { display: flex; gap: 10px; }
-    input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; }
-    .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
-    .btn-gps { background: var(--primary); color: white; }
+    .slider-dots { 
+      display: flex; 
+      justify-content: center; 
+      gap: 6px; 
+      margin-top: 8px; 
+    }
+    .dot { 
+      width: 6px; 
+      height: 6px; 
+      background: #ddd; 
+      border-radius: 50%; 
+      transition: all 0.3s ease; 
+    }
+    .dot.active { 
+      background: var(--primary); 
+      width: 16px; 
+      border-radius: 4px; 
+    }
+
+    /* Kalender Event Section */
+    .event-section { 
+      margin-bottom: 24px; 
+    }
+    .event-banner-card { 
+      background: #ffffff; 
+      border: 1px solid #e8e8e8; 
+      border-radius: 14px; 
+      overflow: hidden; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+      cursor: pointer; 
+      width: 100%; 
+      height: 140px; 
+    }
+    .event-banner-card img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      object-position: center 20%; 
+      display: block;
+    }
     
     /* Member Dashboard */
-    .hero { background: linear-gradient(135deg, var(--primary), #4caf50); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; }
-    .hero::after { content: ""; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-    .poin-text { font-size: 2.5rem; font-weight: bold; margin: 5px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+    .hero { 
+      background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
+      color: white; 
+      padding: 24px; 
+      border-radius: 16px; 
+      text-align: center; 
+      margin-bottom: 24px; 
+      position: relative; 
+      overflow: hidden; 
+      box-shadow: 0 6px 16px rgba(46, 125, 50, 0.2);
+    }
+    .hero::after { 
+      content: ""; 
+      position: absolute; 
+      right: -15px; 
+      bottom: -15px; 
+      width: 80px; 
+      height: 80px; 
+      background: rgba(255,255,255,0.12); 
+      border-radius: 50%; 
+    }
+    .poin-text { 
+      font-size: 2.8rem; 
+      font-weight: 800; 
+      margin: 6px 0; 
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.15); 
+    }
     
-    /* Catalog */
-    .hadiah-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-    .btn-tukar { background: var(--accent); color: #333; }
-    .btn-disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
-    .hidden { display: none; }
+    /* Catalog Hadiah */
+    .catalog-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 12px;
+    }
+    .hadiah-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 16px 0; 
+      border-bottom: 1px solid #f0f0f0; 
+    }
+    .hadiah-item:last-child {
+      border-bottom: none;
+    }
+    .hadiah-info strong {
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+    .hadiah-info small {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: inline-block;
+    }
+    .btn-tukar { 
+      background: var(--accent); 
+      color: #422a00; 
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+    .btn-tukar:hover {
+      background: #ffa000;
+    }
+    .btn-disabled { 
+      background: #eceff1; 
+      color: #b0bec5; 
+      cursor: not-allowed; 
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      border-radius: 8px;
+    }
+    .hidden { 
+      display: none !important; 
+    }
     
-    /* Modal PIN & MODAL IMAGE PREVIEW */
-    .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
-    .modal-content { background: white; margin: 20% auto; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; animation: slideDown 0.3s ease-out; }
+    /* Modals Base */
+    .modal { 
+      display: none; 
+      position: fixed; 
+      z-index: 9999; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.6); 
+      backdrop-filter: blur(4px); 
+    }
+    .modal-content { 
+      background: white; 
+      margin: 25% auto; 
+      padding: 24px; 
+      border-radius: 20px; 
+      width: 80%; 
+      max-width: 300px; 
+      text-align: center; 
+      animation: slideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+    }
     
-    /* Gaya Khusus untuk Pop-up Pembesar Gambar */
+    /* Pop-up Image Preview - Diperbaiki posisinya agar fleksibel menampung gambar tinggi */
     .image-modal-content {
       background: transparent;
-      margin: 15% auto;
+      margin: 10vh auto; /* Jarak atas disesuaikan agar gambar tinggi tidak mentok bawah */
       padding: 0;
       width: 90%;
-      max-width: 400px;
+      max-width: 380px;
       text-align: center;
       position: relative;
       animation: zoomIn 0.3s ease-out;
     }
+    /* Dipastikan object-fit dan tampilannya ter-reset normal (contain) agar terlihat utuh full */
     .image-modal-content img {
       width: 100%;
       height: auto;
-      border-radius: 12px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+      max-height: 75vh; /* Membatasi tinggi maksimal preview di HP agar tombol close (x) tidak hilang */
+      object-fit: contain; 
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .close-image-modal {
       position: absolute;
-      top: -35px;
-      right: 5px;
+      top: -40px;
+      right: 0;
       color: white;
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: bold;
       cursor: pointer;
     }
 
-    .modal-input { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #eee; border-radius: 10px; text-align: center; font-size: 1.5rem; letter-spacing: 8px; box-sizing: border-box; outline: none; }
-    .modal-input:focus { border-color: var(--primary); }
-    .btn-confirm { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
-    .btn-cancel { margin-top: 15px; color: #888; font-size: 0.85rem; cursor: pointer; display: inline-block; text-decoration: underline; }
+    /* Modal PIN */
+    .modal-input { 
+      width: 100%; 
+      padding: 12px; 
+      margin: 20px 0; 
+      border: 2px solid #e0e0e0; 
+      border-radius: 12px; 
+      text-align: center; 
+      font-size: 1.6rem; 
+      letter-spacing: 6px; 
+      box-sizing: border-box; 
+      outline: none; 
+    }
+    .modal-input:focus { 
+      border-color: var(--primary); 
+    }
+    .btn-confirm { 
+      width: 100%; 
+      padding: 14px; 
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      border-radius: 12px; 
+      font-weight: bold; 
+      font-size: 0.95rem; 
+      cursor: pointer; 
+    }
+    .btn-cancel { 
+      margin-top: 16px; 
+      color: var(--text-muted); 
+      font-size: 0.85rem; 
+      cursor: pointer; 
+      display: inline-block; 
+      text-decoration: underline; 
+    }
     
-    @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    /* Footer links */
+    .footer-section {
+      text-align: center; 
+      margin-top: 20px;
+    }
+    .link-daftar-style {
+      color: var(--primary); 
+      font-weight: 600; 
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .link-daftar-style:hover {
+      text-decoration: underline;
+    }
+    
+    @keyframes slideDown { from { transform: translateY(-40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes zoomIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* ==========================================================================
+       MEDIA QUERIES (OTOMATIS MENYESUAIKAN JIKA DIBUKA DI HP)
+       ========================================================================== */
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;         /* Padding normal di HP */
+        align-items: flex-start; /* Posisi kembali normal dari atas ke bawah */
+        background: var(--bg); /* Menghapus gradasi desktop agar loading HP ringan */
+      }
+      body::before, body::after {
+        display: none;         /* Menghilangkan bulatan abstrak di layar HP */
+      }
+    }
   </style>
 </head>
 <body>
@@ -124,57 +444,61 @@
       </div>
       
       <div class="input-group" id="loginSection">
-        <input type="text" id="idCek" placeholder="Masukkan No HP...">
+        <input type="text" id="idCek" placeholder="Contoh: 8123456789 (tanpa angka 0)..." inputmode="numeric">
         <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek</button>
       </div>
 
       <div class="promo-section">
-        <div class="promo-title"><span>📢</span> Promo & Info Spesial Untukmu</div>
-        
+        <div class="section-title"><span>📢</span> Promo & Info Spesial Untukmu</div>
         <div class="slider-wrapper">
           <div class="promo-container" id="promoContainer">
-            
-            <div class="promo-card" style="border: none;" onclick="perbesarBanner(this)">
+            <div class="promo-card" onclick="perbesarBanner(this)">
               <img src="https://i.ibb.co.com/7dwdHFxJ/ABSOLUTEA-Green-Pramuka-Square-Opening-Promo-Beli-1-Gratis-1.jpg" alt="Promo 1">
             </div>
-            
-            <div class="promo-card" style="border: none;" onclick="perbesarBanner(this)">
+            <div class="promo-card" onclick="perbesarBanner(this)">
               <img src="https://i.ibb.co.com/7dwdHFxJ/ABSOLUTEA-Green-Pramuka-Square-Opening-Promo-Beli-1-Gratis-1.jpg" alt="Promo 2">
             </div>
-
-            <div class="promo-card" style="border: none;" onclick="perbesarBanner(this)">
+            <div class="promo-card" onclick="perbesarBanner(this)">
               <img src="https://i.ibb.co.com/7dwdHFxJ/ABSOLUTEA-Green-Pramuka-Square-Opening-Promo-Beli-1-Gratis-1.jpg" alt="Promo 3">
             </div>
-
           </div>
-        </div>
-        
+        </div> 
+        <p class="section-note">🔍 Ketuk gambar untuk memperbesar detail promo</p>
         <div class="slider-dots" id="sliderDots"></div>
+      </div>
+
+      <div class="event-section">
+        <div class="section-title"><span>📅</span> Event & Kalender Acara Mall</div>
+        <div class="event-banner-card" onclick="perbesarBanner(this)">
+          <img src="https://i.ibb.co.com/gLXNGTvq/IMG-20260602-114649.jpg" alt="June and Joy Event GPS">
+        </div>
+        <p class="section-note">🔍 Ketuk gambar untuk memperbesar kalender acara</p>
       </div>
 
       <div id="dashboard" class="hidden">
         <div class="hero">
-          <h6 id="namaCust" style="margin:0; font-size: 1rem; letter-spacing: 0.5px;">-</h6>
+          <h6 id="namaCust" style="margin:0; font-size: 1rem; letter-spacing: 0.5px; font-weight: 500;">-</h6>
           <div class="poin-text" id="poinCust">0</div>
-          <p style="margin:0; opacity: 0.9; font-size: 0.9rem;">Green Points</p>
+          <p style="margin:0; opacity: 0.9; font-size: 0.85rem; letter-spacing: 0.5px;">GREEN POINTS</p>
         </div>
 
-        <h5 style="margin-bottom:10px; font-weight: bold; color: #444;">Katalog Hadiah</h5>
+        <h5 class="catalog-title">Katalog Hadiah</h5>
         <div id="listHadiah"></div>
       </div>
       
-      <div style="text-align:center; margin-top:20px;">
-        <p id="linkDaftar"><a href="registrasi.html" style="color:var(--primary); font-weight: 600; text-decoration: none;">Belum punya akun? Daftar Sekarang</a></p>
-        <button id="btnCekLain" class="btn btn-gps hidden" style="background:#6c757d" onclick="resetDashboard()">« Cek Nomor Lain</button>
+      <div class="footer-section">
+        <p id="linkDaftar"><a href="registrasi.html" class="link-daftar-style">Belum punya akun? Daftar Sekarang</a></p>
+        <button id="btnCekLain" class="btn btn-gps hidden" style="background:#6c757d; width: 100%; margin-top: 10px;" onclick="resetDashboard()">« Cek Nomor Lain</button>
       </div>
+
     </div>
   </div>
 
   <div id="pinModal" class="modal">
     <div class="modal-content">
-      <h3 style="margin:0; color:var(--primary);">Konfirmasi PIN</h3>
-      <p style="font-size:0.85rem; color:#666;">Silakan masukkan PIN transaksi Anda</p>
-      <input type="password" id="pinInputan" class="modal-input" maxlength="6" inputmode="numeric" placeholder="•••••">
+      <h3 style="margin:0; color:var(--primary); font-size: 1.2rem;">Konfirmasi PIN</h3>
+      <p style="font-size:0.85rem; color:#666; margin-top: 6px;">Silakan masukkan PIN transaksi Anda</p>
+      <input type="password" id="pinInputan" class="modal-input" maxlength="6" inputmode="numeric" placeholder="••••••">
       <button id="btnKonfirmasi" class="btn-confirm" onclick="eksekusiTukar()">TUKAR SEKARANG</button>
       <div class="btn-cancel" onclick="tutupModal()">Batalkan</div>
     </div>
@@ -182,7 +506,7 @@
 
   <div id="imageModal" class="modal" onclick="tutupPreviewBanner()">
     <div class="image-modal-content" onclick="event.stopPropagation()">
-      <span class="close-image-modal" onclick="tutupPreviewBanner()">&times;</span>
+      <span class="close-image-modal" onclick="tutupPreviewBanner()">×</span>
       <img id="imgPreviewTarget" src="" alt="Preview Banner">
     </div>
   </div>
@@ -200,17 +524,23 @@
       inisialisasiAutoSlide();
     });
 
-    /* ==================== FUNGSI BARU UNTUK MODAL BANNER ==================== */
+    // PERBAIKAN UTAMA: Mengatur gaya penampilan gambar modal pop-up secara dinamis agar selalu penuh dan proporsional
     function perbesarBanner(element) {
       const srcGambar = element.querySelector('img').src;
-      document.getElementById('imgPreviewTarget').src = srcGambar;
+      const targetImg = document.getElementById('imgPreviewTarget');
+      
+      targetImg.src = srcGambar;
+      
+      // Reset property objectFit khusus untuk tampilan modal agar gambar memanjang penuh ke bawah
+      targetImg.style.objectFit = "contain";
+      targetImg.style.objectPosition = "center center";
+      
       document.getElementById('imageModal').style.display = 'block';
     }
 
     function tutupPreviewBanner() {
       document.getElementById('imageModal').style.display = 'none';
     }
-    /* ======================================================================== */
 
     function resetDashboard() {
       document.getElementById('dashboard').classList.add('hidden');
@@ -314,10 +644,10 @@
           }
 
           container.innerHTML += `<div class="hadiah-item">
-            <div>
+            <div class="hadiah-info">
               <strong>${item.nama}</strong><br>
-              <small style="color:#666">${item.poin} Poin</small> 
-              <span style="font-size: 0.75rem; color: ${parseInt(item.stok) <= 3 ? 'red' : '#2e7d32'}; font-weight: bold; margin-left: 5px;">
+              <small>${item.poin} Poin</small> 
+              <span style="font-size: 0.75rem; color: ${parseInt(item.stok) <= 3 ? '#e53935' : '#2e7d32'}; font-weight: bold; margin-left: 5px;">
                 (Stok: ${item.stok})
               </span>
             </div>
