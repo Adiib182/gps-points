@@ -4,9 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Green Pramuka Square - Member Rewards</title>
+  
+  <!-- TAG WAJIB PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2e7d32">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <!-- Favicon fallback agar tidak error merah di console -->
+  <link rel="icon" type="image/png" href="icon-192.png">
+
   <style>
     :root { 
       --primary: #2e7d32; 
@@ -176,7 +181,7 @@
       border-radius: 14px; 
       box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
       position: relative;
-      touch-action: pan-y; /* Membantu swipe horizontal agar tidak mengganggu scroll vertikal halaman */
+      touch-action: pan-y;
     }
     .promo-container { 
       display: flex; 
@@ -195,7 +200,7 @@
       height: 100%;
       object-fit: fill; 
       display: block;
-      pointer-events: none; /* Mencegah bug bawaan browser saat gambar ditarik manual */
+      pointer-events: none;
     }
     
     .section-note {
@@ -498,6 +503,12 @@
       
       <div class="footer-section">
         <p id="linkDaftar"><a href="registrasi.html" class="link-daftar-style">Belum punya akun? Daftar Sekarang</a></p>
+        
+        <!-- TOMBOL INSTALL PWA CUSTOM (Sembunyi by default) -->
+        <button id="btnInstallPWA" class="btn btn-gps" style="display: none; background: #ff9800; width: 100%; margin-top: 15px;">
+          📱 Install Aplikasi GPS Rewards
+        </button>
+
         <button id="btnCekLain" class="btn btn-gps hidden" style="background:#6c757d; width: 100%; margin-top: 10px;" onclick="resetDashboard()">« Cek Nomor Lain</button>
       </div>
 
@@ -536,7 +547,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
       inisialisasiAutoSlide();
-      aturFiturSwipeJari(); // Aktifkan pendeteksi geseran jari manual
+      aturFiturSwipeJari(); 
     });
 
     function perbesarBanner(element) {
@@ -601,7 +612,6 @@
       }
     };
 
-    // Fungsi update posisi slider banner agar sinkron otomatis & manual
     function perbaruiPosisiSlider() {
       const container = document.getElementById('promoContainer');
       const dotsContainer = document.getElementById('sliderDots');
@@ -643,7 +653,6 @@
       }, 4000);
     }
 
-    // UPDATE TERBARU: Menangkap input gerakan geser jari di layar HP
     function aturFiturSwipeJari() {
       const wrapper = document.getElementById('sliderWrapper');
       const container = document.getElementById('promoContainer');
@@ -661,20 +670,18 @@
         const totalPromo = container.children.length;
         if (totalPromo <= 1) return;
 
-        const jarakGeserMinimal = 50; // Menentukan sensitivitas geseran dalam pixel
+        const jarakGeserMinimal = 50; 
         
-        // JIKA DISWIPE KE KIRI (Melihat item berikutnya)
         if (touchStartX - touchEndX > jarakGeserMinimal) {
           indeksPromoSekarang = (indeksPromoSekarang + 1) % totalPromo;
           perbaruiPosisiSlider();
-          jalankanTimerAutoSlide(totalPromo); // Reset timer otomatis agar tidak tabrakan setelah user geser manual
+          jalankanTimerAutoSlide(totalPromo); 
         }
         
-        // JIKA DISWIPE KE KANAN (Melihat item sebelumnya)
         if (touchEndX - touchStartX > jarakGeserMinimal) {
           indeksPromoSekarang = (indeksPromoSekarang - 1 + totalPromo) % totalPromo;
           perbaruiPosisiSlider();
-          jalankanTimerAutoSlide(totalPromo); // Reset timer otomatis
+          jalankanTimerAutoSlide(totalPromo); 
         }
       }
     }
@@ -753,7 +760,12 @@
         loadDashboard(); 
       }
     };
-  // Registrasi Service Worker PWA
+
+    // =======================================================
+    // BLOK SCRIPT PWA & SERVICE WORKER
+    // =======================================================
+    
+    // 1. Mendaftarkan Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
@@ -765,6 +777,44 @@
           });
       });
     }
+
+    // 2. Logika Tombol Install Custom PWA
+    let deferredPrompt;
+    const btnInstall = document.getElementById('btnInstallPWA');
+
+    // Menangkap event dari Chrome sebelum pop-up default muncul
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Mencegah pop-up default Chrome muncul
+      e.preventDefault();
+      // Menyimpan event agar bisa dipanggil saat tombol diklik
+      deferredPrompt = e;
+      // Menampilkan tombol "Install Aplikasi" buatan kita
+      btnInstall.style.display = 'block';
+    });
+
+    // Menjalankan instalasi ketika tombol kita diklik
+    btnInstall.addEventListener('click', async () => {
+      if (deferredPrompt !== null) {
+        // Menampilkan prompt instalasi bawaan sistem
+        deferredPrompt.prompt();
+        // Menunggu pengguna memilih "Install" atau "Cancel"
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User menerima instalasi PWA');
+          // Sembunyikan tombol setelah diinstal
+          btnInstall.style.display = 'none';
+        }
+        // Kosongkan prompt agar tidak bisa dipanggil dua kali
+        deferredPrompt = null;
+      }
+    });
+
+    // Event listener jika aplikasi sudah berhasil diinstal (menyembunyikan tombol)
+    window.addEventListener('appinstalled', () => {
+      btnInstall.style.display = 'none';
+      console.log('PWA berhasil diinstal di sistem');
+    });
+
   </script>
 </body>
 </html>
