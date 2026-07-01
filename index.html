@@ -762,7 +762,7 @@
     };
 
     // =======================================================
-    // BLOK SCRIPT PWA & SERVICE WORKER
+    // BLOK SCRIPT PWA & SERVICE WORKER (VERSI SMART FALLBACK)
     // =======================================================
     
     // 1. Mendaftarkan Service Worker
@@ -770,7 +770,7 @@
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
           .then(registration => {
-            console.log('ServiceWorker berhasil didaftarkan dengan scope: ', registration.scope);
+            console.log('ServiceWorker berhasil didaftarkan');
           })
           .catch(err => {
             console.log('Pendaftaran ServiceWorker gagal: ', err);
@@ -779,40 +779,46 @@
     }
 
     // 2. Logika Tombol Install Custom PWA
-    let deferredPrompt;
+    let deferredPrompt = null;
     const btnInstall = document.getElementById('btnInstallPWA');
 
-    // Menangkap event dari Chrome sebelum pop-up default muncul
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Mencegah pop-up default Chrome muncul
-      e.preventDefault();
-      // Menyimpan event agar bisa dipanggil saat tombol diklik
-      deferredPrompt = e;
-      // Menampilkan tombol "Install Aplikasi" buatan kita
+    // Cek apakah web saat ini sedang dibuka sebagai aplikasi (PWA) atau masih di browser
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    // Jika belum diinstal (masih di browser), SELALU TAMPILKAN tombol
+    if (!isPWA) {
       btnInstall.style.display = 'block';
+    }
+
+    // Menangkap event dari Chrome (Hanya jalan di Android/Chrome/Edge)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
     });
 
-    // Menjalankan instalasi ketika tombol kita diklik
+    // Aksi saat tombol instal diklik
     btnInstall.addEventListener('click', async () => {
       if (deferredPrompt !== null) {
-        // Menampilkan prompt instalasi bawaan sistem
+        // Jika sistem mengizinkan auto-prompt (Android/Chrome)
         deferredPrompt.prompt();
-        // Menunggu pengguna memilih "Install" atau "Cancel"
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-          console.log('User menerima instalasi PWA');
-          // Sembunyikan tombol setelah diinstal
           btnInstall.style.display = 'none';
         }
-        // Kosongkan prompt agar tidak bisa dipanggil dua kali
         deferredPrompt = null;
+      } else {
+        // FALLBACK MANUAL: Jika Chrome sedang cooldown ATAU pengguna memakai iPhone/Safari
+        alert(
+          "📱 CARA INSTAL APLIKASI:\n\n" +
+          "Untuk Android (Chrome):\nKetuk ikon Menu (titik tiga ⋮) di pojok kanan atas, lalu pilih 'Instal Aplikasi' atau 'Tambahkan ke Layar Utama'.\n\n" +
+          "Untuk iPhone (Safari):\nKetuk ikon 'Share' (kotak dengan panah ke atas) di menu bawah, lalu geser dan pilih 'Tambah ke Layar Utama'."
+        );
       }
     });
 
-    // Event listener jika aplikasi sudah berhasil diinstal (menyembunyikan tombol)
+    // Menyembunyikan tombol secara permanen jika sukses diinstal
     window.addEventListener('appinstalled', () => {
       btnInstall.style.display = 'none';
-      console.log('PWA berhasil diinstal di sistem');
     });
 
   </script>
