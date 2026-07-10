@@ -461,10 +461,9 @@
       </div>
       
       <div class="input-group" id="loginSection" style="flex-direction: column; gap: 12px;">
-        <input type="text" id="idCek" placeholder="Contoh: 8123456789 (tanpa angka 0)..." inputmode="numeric">
-        <input type="password" id="pinCek" placeholder="Masukkan PIN Anda..." inputmode="numeric" maxlength="6" style="padding: 14px 16px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 0.95rem; background-color: #fafafa; outline: none; width: 100%; box-sizing: border-box;">
-        
-        <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek Poin & Login</button>
+        <input type="text" id="idCek" placeholder="Masukkan Nomor HP..." inputmode="numeric">
+        <input type="password" id="pinCek" placeholder="Masukkan PIN 6 Angka..." inputmode="numeric" maxlength="6" style="padding: 14px 16px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 0.95rem; background-color: #fafafa; outline: none; width: 100%; box-sizing: border-box;">
+        <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Login & Cek Poin</button>
       </div>
 
       <div class="promo-section">
@@ -585,20 +584,52 @@
     }
     
     function loadDashboard() {
-      const id = document.getElementById('idCek').value;
-      const pin = document.getElementById('pinCek').value;
+      const idEl = document.getElementById('idCek');
+      const pinEl = document.getElementById('pinCek');
       
-      if(!id) return alert("Silakan masukkan nomor HP.");
-      if(!pin) return alert("Silakan masukkan PIN Anda."); // Peringatan jika PIN kosong
+      const id = idEl ? idEl.value.trim() : "";
+      const pin = pinEl ? pinEl.value.trim() : "";
+      
+      if(!id) return alert("Silakan masukkan nomor HP Anda.");
+      if(!pin) return alert("Silakan masukkan PIN Anda.");
       
       const btnCek = document.getElementById('btnCek');
       btnCek.innerHTML = '<div class="spinner"></div>';
       btnCek.disabled = true;
 
       memberIdTemp = id;
-      // Perhatikan baris ini berubah, ada tambahan &pin=${pin}
-      panggilJSONP(`${API_URL}?action=cekPoin&id=${id}&pin=${pin}`, "callbackCekPoin");
+      
+      // Mencegah nghank selamanya jika Apps Script error
+      setTimeout(() => {
+        if(btnCek.disabled) {
+           btnCek.innerHTML = 'Login & Cek Poin';
+           btnCek.disabled = false;
+           alert("Gagal memuat. Pastikan Anda sudah 'Deploy Ulang' Apps Script.");
+        }
+      }, 10000); // Batal otomatis setelah 10 detik
+
+      panggilJSONP(`${API_URL}?action=cekPoin&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}`, "callbackCekPoin");
     }
+
+    window.callbackCekPoin = function(res) {
+      const btnCek = document.getElementById('btnCek');
+      btnCek.innerHTML = "Login & Cek Poin"; // Teks dikembalikan
+      btnCek.disabled = false;
+
+      if(res.status === "success") {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('linkDaftar').classList.add('hidden');
+        document.getElementById('btnCekLain').classList.remove('hidden');
+        document.getElementById('namaCust').innerText = res.data.nama;
+        document.getElementById('poinCust').innerText = res.data.poin;
+        currentPoinUser = res.data.poin;
+        
+        panggilJSONP(`${API_URL}?action=getKatalog`, "callbackKatalog");
+      } else {
+        alert(res.message || "Member tidak ditemukan.");
+      }
+    };
 
     function perbaruiPosisiSlider() {
       const container = document.getElementById('promoContainer');
