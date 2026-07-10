@@ -460,10 +460,10 @@
         <h4>The Place for Every Taste & Hangout</h4>
       </div>
       
-      <div class="input-group" id="loginSection">
-        <input type="text" id="idCek" placeholder="Nomor HP (Contoh: 8123456789)..." inputmode="numeric">
-        <!-- Tambahkan input PIN di bawah ini -->
-        <input type="password" id="pinCek" placeholder="Masukkan PIN Anda..." inputmode="numeric" maxlength="6">
+      <div class="input-group" id="loginSection" style="flex-direction: column; gap: 12px;">
+        <input type="text" id="idCek" placeholder="Contoh: 8123456789 (tanpa angka 0)..." inputmode="numeric">
+        <input type="password" id="pinCek" placeholder="Masukkan PIN Anda..." inputmode="numeric" maxlength="6" style="padding: 14px 16px; border: 1px solid #e0e0e0; border-radius: 12px; font-size: 0.95rem; background-color: #fafafa; outline: none; width: 100%; box-sizing: border-box;">
+        
         <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek Poin & Login</button>
       </div>
 
@@ -537,7 +537,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyJ_A34WEQOnHTfWYZzcnZmyK1fbrnUgcfRFB0GBRRjpYtG0n_vq1lFDN4TbV_G3o76eA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbz6UlvL-GFk8xck0S6z79oc2Zb0L20ymL0LW9FXkR3lP34S_Sxgxmju4YwjijqGNgSZpg/exec";
     let memberIdTemp = "";
     let hadiahTemp = "";
     let currentPoinUser = 0;
@@ -587,36 +587,18 @@
     function loadDashboard() {
       const id = document.getElementById('idCek').value;
       const pin = document.getElementById('pinCek').value;
+      
       if(!id) return alert("Silakan masukkan nomor HP.");
-      if(!pin) return alert("Silakan masukkan PIN Anda.");
+      if(!pin) return alert("Silakan masukkan PIN Anda."); // Peringatan jika PIN kosong
       
       const btnCek = document.getElementById('btnCek');
       btnCek.innerHTML = '<div class="spinner"></div>';
       btnCek.disabled = true;
 
       memberIdTemp = id;
+      // Perhatikan baris ini berubah, ada tambahan &pin=${pin}
       panggilJSONP(`${API_URL}?action=cekPoin&id=${id}&pin=${pin}`, "callbackCekPoin");
     }
-
-    window.callbackCekPoin = function(res) {
-      const btnCek = document.getElementById('btnCek');
-      btnCek.innerHTML = "Cek";
-      btnCek.disabled = false;
-
-      if(res.status === "success") {
-        document.getElementById('loginSection').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('linkDaftar').classList.add('hidden');
-        document.getElementById('btnCekLain').classList.remove('hidden');
-        document.getElementById('namaCust').innerText = res.data.nama;
-        document.getElementById('poinCust').innerText = res.data.poin;
-        currentPoinUser = res.data.poin;
-        
-        panggilJSONP(`${API_URL}?action=getKatalog`, "callbackKatalog");
-      } else {
-        alert(res.message || "Member tidak ditemukan.");
-      }
-    };
 
     function perbaruiPosisiSlider() {
       const container = document.getElementById('promoContainer');
