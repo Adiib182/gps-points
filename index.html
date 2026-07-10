@@ -106,11 +106,13 @@
     
     .input-group { 
       display: flex; 
-      gap: 8px; 
+      flex-direction: column; /* Mengubah susunan menjadi atas-bawah */
+      gap: 12px; 
       margin-bottom: 24px;
     }
-    input[type="text"] { 
-      flex: 1; 
+    input[type="text"], input[type="password"] { /* Tambahkan selektor password */
+      width: 100%;
+      box-sizing: border-box;
       padding: 14px 16px; 
       border: 1px solid #e0e0e0; 
       border-radius: 12px; 
@@ -119,7 +121,7 @@
       transition: all 0.3s ease;
       background-color: #fafafa;
     }
-    input[type="text"]:focus {
+    input[type="text"]:focus, input[type="password"]:focus {
       border-color: var(--primary);
       background-color: #fff;
       box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
@@ -459,8 +461,10 @@
       </div>
       
       <div class="input-group" id="loginSection">
-        <input type="text" id="idCek" placeholder="Contoh: 8123456789 (tanpa angka 0)..." inputmode="numeric">
-        <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek</button>
+        <input type="text" id="idCek" placeholder="Nomor HP (Contoh: 8123456789)..." inputmode="numeric">
+        <!-- Tambahkan input PIN di bawah ini -->
+        <input type="password" id="pinCek" placeholder="Masukkan PIN Anda..." inputmode="numeric" maxlength="6">
+        <button class="btn btn-gps" id="btnCek" onclick="loadDashboard()">Cek Poin & Login</button>
       </div>
 
       <div class="promo-section">
@@ -582,14 +586,16 @@
     
     function loadDashboard() {
       const id = document.getElementById('idCek').value;
+      const pin = document.getElementById('pinCek').value;
       if(!id) return alert("Silakan masukkan nomor HP.");
+      if(!pin) return alert("Silakan masukkan PIN Anda.");
       
       const btnCek = document.getElementById('btnCek');
       btnCek.innerHTML = '<div class="spinner"></div>';
       btnCek.disabled = true;
 
       memberIdTemp = id;
-      panggilJSONP(`${API_URL}?action=cekPoin&id=${id}`, "callbackCekPoin");
+      panggilJSONP(`${API_URL}?action=cekPoin&id=${id}&pin=${pin}`, "callbackCekPoin");
     }
 
     window.callbackCekPoin = function(res) {
